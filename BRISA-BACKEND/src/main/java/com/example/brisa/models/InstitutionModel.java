@@ -16,6 +16,9 @@ public class InstitutionModel{
     private String code; // não sei bem que código é esse, precisa confirmar se é o id ou outro código
     private String name; // nome da instituição
     private String acronym; // Sigla
+
+    @Column(name = "state")
+    private String state;
     
     @Column(name = "local_coordinator")
     private String localCoordinatorName; // Apenas texto, ou link para Person se necessário
