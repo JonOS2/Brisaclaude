@@ -303,9 +303,8 @@ export default {
       try {
         program.value = await programService.getById(programId.value);
 
-        // Carregar todas as turmas e filtrar pelo programa atual
-        const allClasses = await classService.getAll();
-        classes.value = allClasses.filter(c => c.program?.id == programId.value);
+        // ✅ Busca diretamente as turmas do programa via endpoint dedicado
+        classes.value = await classService.getByProgramId(programId.value);
 
         // Carregar instituições
         institutions.value = await institutionService.getAll();

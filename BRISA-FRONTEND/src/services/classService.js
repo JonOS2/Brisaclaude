@@ -1,6 +1,26 @@
 import api from './api';
 
 export const classService = {
+  // ✅ Retorna mapa { programId: count } em uma única chamada ao backend
+  async getCountByProgram() {
+    try {
+      const response = await api.get('/classes/count-by-program');
+      return response.data; // ex: { 1: 3, 2: 1 }
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // ✅ Novo: busca turmas diretamente pelo programId — mais eficiente que getAll() + filtro
+  async getByProgramId(programId) {
+    try {
+      const response = await api.get(`/classes/program/${programId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   async getAll() {
     try {
       const response = await api.get('/classes');

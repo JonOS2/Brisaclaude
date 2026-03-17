@@ -25,7 +25,6 @@
         </button>
       </div>
     </div>
-
     <div class="search-container">
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2" class="search-icon">
@@ -35,12 +34,10 @@
       <input v-model="searchTerm" type="text" placeholder="Buscar por código ou nome do programa..."
         class="search-input" />
     </div>
-
     <div v-if="loading" class="loading">
       <div class="spinner"></div>
       <p>Carregando programas...</p>
     </div>
-
     <div v-else-if="error" class="error-box">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2">
@@ -50,7 +47,6 @@
       </svg>
       {{ error }}
     </div>
-
     <div v-else-if="filteredPrograms.length === 0" class="empty-state">
       <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2">
@@ -68,7 +64,6 @@
         Criar Primeiro Programa
       </button>
     </div>
-
     <div v-else class="programs-grid">
       <div v-for="program in filteredPrograms" :key="program.id" class="program-card" @click="viewClasses(program)">
         <div class="card-header">
@@ -87,11 +82,9 @@
             </svg>
           </button>
         </div>
-
         <div class="card-body">
           <h3 class="program-name">{{ program.name }}</h3>
           <div class="program-code">{{ program.code }}</div>
-
           <div class="program-details">
             <div class="detail-item" v-if="program.contractNumber">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -101,7 +94,6 @@
               </svg>
               <span>{{ program.contractNumber }}</span>
             </div>
-
             <div class="detail-item">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
@@ -114,7 +106,6 @@
             </div>
           </div>
         </div>
-
         <div class="card-footer">
           <div class="stat-badge">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -124,7 +115,8 @@
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
-            <span>{{ program.classes?.length || 0 }} turma(s)</span>
+            <!-- ✅ Corrigido: usa classesCount do backend em vez de program.classes?.length -->
+            <span>{{ classesCount[program.id] || 0 }} turma(s)</span>
           </div>
           <div class="arrow-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -136,7 +128,6 @@
         </div>
       </div>
     </div>
-
     <!-- Modal de Criação/Edição -->
     <div v-if="showCreateModal" class="modal-overlay" @click="closeCreateModal">
       <div class="modal-content modal-form" @click.stop>
@@ -146,42 +137,35 @@
             <label for="code">Código *</label>
             <input id="code" v-model="programForm.code" type="text" required placeholder="Ex: PROG001" />
           </div>
-
           <div class="form-group">
             <label for="name">Nome *</label>
             <input id="name" v-model="programForm.name" type="text" required placeholder="Nome do programa" />
           </div>
-
           <div class="form-group">
             <label for="contractNumber">Número do Contrato</label>
             <input id="contractNumber" v-model="programForm.contractNumber" type="text"
               placeholder="Número do contrato" />
           </div>
-
           <div class="form-row">
             <div class="form-group">
               <label for="startDate">Data Início</label>
               <input id="startDate" v-model="programForm.startDate" type="date" />
             </div>
-
             <div class="form-group">
               <label for="endDate">Data Fim</label>
               <input id="endDate" v-model="programForm.endDate" type="date" />
             </div>
           </div>
-
           <div v-if="formError" class="error">{{ formError }}</div>
-
           <div class="modal-actions">
             <button type="button" @click="closeCreateModal" class="btn-secondary">Cancelar</button>
-            <button type="submit" :disabled="saving || formError"  class="btn-primary">
+            <button type="submit" :disabled="saving || formError" class="btn-primary">
               {{ saving ? 'Salvando...' : 'Salvar' }}
             </button>
           </div>
         </form>
       </div>
     </div>
-
     <!-- Modal de Upload -->
     <div v-if="showUploadModal" class="modal-overlay" @click="closeUploadModal">
       <div class="modal-content" @click.stop>
@@ -206,6 +190,7 @@
 <script>
 import { ref, computed, onMounted, watch } from 'vue';
 import { programService } from '@/services/programService';
+import { classService } from '@/services/classService'; // ✅ import adicionado
 import { useRouter } from 'vue-router';
 
 export default {
@@ -213,6 +198,7 @@ export default {
   setup() {
     const router = useRouter();
     const programs = ref([]);
+    const classesCount = ref({}); // ✅ novo ref para contagem de turmas
     const loading = ref(false);
     const error = ref(null);
     const searchTerm = ref('');
@@ -242,7 +228,6 @@ export default {
           formError.value = null;
           return;
         }
-
         if (endDate < startDate) {
           formError.value = 'Data inválida: a data de fim não pode ser anterior à data de início';
         } else {
@@ -251,10 +236,8 @@ export default {
       }
     );
 
-
     const filteredPrograms = computed(() => {
       if (!searchTerm.value) return programs.value;
-
       const term = searchTerm.value.toLowerCase();
       return programs.value.filter(program =>
         program.code?.toLowerCase().includes(term) ||
@@ -262,11 +245,17 @@ export default {
       );
     });
 
+    // ✅ Carrega programas e contagem de turmas em paralelo
     const loadPrograms = async () => {
       loading.value = true;
       error.value = null;
       try {
-        programs.value = await programService.getAll();
+        const [progs, counts] = await Promise.all([
+          programService.getAll(),
+          classService.getCountByProgram().catch(() => ({}))
+        ]);
+        programs.value = progs;
+        classesCount.value = counts;
       } catch (err) {
         error.value = 'Erro ao carregar programas: ' + (err.response?.data?.message || err.message);
       } finally {
@@ -299,14 +288,12 @@ export default {
       if (formError.value) return;
       saving.value = true;
       formError.value = null;
-
       try {
         if (editingProgram.value) {
           await programService.update(editingProgram.value.id, programForm.value);
         } else {
           await programService.create(programForm.value);
         }
-
         closeCreateModal();
         loadPrograms();
       } catch (err) {
@@ -337,11 +324,9 @@ export default {
 
     const uploadFile = async () => {
       if (!selectedFile.value) return;
-
       uploading.value = true;
       uploadError.value = null;
       uploadSuccess.value = null;
-
       try {
         await programService.importExcel(selectedFile.value);
         uploadSuccess.value = 'Arquivo importado com sucesso!';
@@ -372,6 +357,7 @@ export default {
 
     return {
       programs,
+      classesCount, // ✅ exposto para o template
       loading,
       error,
       searchTerm,
@@ -406,32 +392,27 @@ export default {
   max-width: 1400px;
   margin: 0 auto;
 }
-
 .header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 32px;
 }
-
 .header-left h1 {
   margin: 0 0 4px 0;
   color: #1F285F;
   font-size: 32px;
   font-weight: 700;
 }
-
 .subtitle {
   margin: 0;
   color: #666;
   font-size: 15px;
 }
-
 .header-actions {
   display: flex;
   gap: 12px;
 }
-
 .btn-create {
   background: linear-gradient(135deg, #1F285F 0%, #0288d1 100%);
   color: white;
@@ -447,17 +428,14 @@ export default {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(31, 40, 95, 0.15);
 }
-
 .btn-create:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(31, 40, 95, 0.25);
 }
-
 .btn-create:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(31, 40, 95, 0.15);
 }
-
 .btn-import {
   background: white;
   color: #0288d1;
@@ -473,24 +451,20 @@ export default {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(2, 136, 209, 0.1);
 }
-
 .btn-import:hover {
   background: #0288d1;
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(2, 136, 209, 0.25);
 }
-
 .btn-import:active {
   transform: translateY(0);
 }
-
 .search-container {
   position: relative;
   margin-bottom: 32px;
   max-width: 500px;
 }
-
 .search-icon {
   position: absolute;
   left: 16px;
@@ -498,7 +472,6 @@ export default {
   transform: translateY(-50%);
   color: #999;
 }
-
 .search-input {
   width: 100%;
   padding: 14px 16px 14px 48px;
@@ -507,20 +480,16 @@ export default {
   font-size: 15px;
   transition: all 0.2s;
 }
-
 .search-input:focus {
   outline: none;
   border-color: #0288d1;
   box-shadow: 0 0 0 3px rgba(2, 136, 209, 0.1);
 }
-
-/* Programs Grid */
 .programs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 24px;
 }
-
 .program-card {
   background: white;
   border-radius: 12px;
@@ -530,20 +499,17 @@ export default {
   cursor: pointer;
   border: 2px solid transparent;
 }
-
 .program-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(31, 40, 95, 0.12);
   border-color: #0288d1;
 }
-
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
-
 .card-icon {
   width: 48px;
   height: 48px;
@@ -554,7 +520,6 @@ export default {
   justify-content: center;
   color: white;
 }
-
 .btn-icon {
   background: #f5f5f5;
   border: none;
@@ -568,16 +533,13 @@ export default {
   color: #666;
   transition: all 0.2s;
 }
-
 .btn-icon:hover {
   background: #0288d1;
   color: white;
 }
-
 .card-body {
   margin-bottom: 20px;
 }
-
 .program-name {
   margin: 0 0 8px 0;
   color: #1F285F;
@@ -585,7 +547,6 @@ export default {
   font-weight: 700;
   line-height: 1.3;
 }
-
 .program-code {
   display: inline-block;
   background: #e3f2fd;
@@ -596,13 +557,11 @@ export default {
   font-weight: 600;
   margin-bottom: 16px;
 }
-
 .program-details {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-
 .detail-item {
   display: flex;
   align-items: center;
@@ -610,12 +569,10 @@ export default {
   color: #666;
   font-size: 14px;
 }
-
 .detail-item svg {
   color: #999;
   flex-shrink: 0;
 }
-
 .card-footer {
   display: flex;
   justify-content: space-between;
@@ -623,7 +580,6 @@ export default {
   padding-top: 16px;
   border-top: 1px solid #f0f0f0;
 }
-
 .stat-badge {
   display: flex;
   align-items: center;
@@ -635,18 +591,14 @@ export default {
   font-size: 14px;
   font-weight: 600;
 }
-
 .stat-badge svg {
   color: #0288d1;
 }
-
 .arrow-icon {
   color: #0288d1;
   display: flex;
   align-items: center;
 }
-
-/* Loading & Empty States */
 .loading {
   display: flex;
   flex-direction: column;
@@ -655,7 +607,6 @@ export default {
   padding: 80px 20px;
   color: #666;
 }
-
 .spinner {
   width: 48px;
   height: 48px;
@@ -665,13 +616,9 @@ export default {
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
 }
-
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
-
 .error-box {
   display: flex;
   align-items: center;
@@ -682,29 +629,24 @@ export default {
   border-radius: 8px;
   color: #c62828;
 }
-
 .empty-state {
   text-align: center;
   padding: 80px 20px;
 }
-
 .empty-state svg {
   color: #e0e0e0;
   margin-bottom: 16px;
 }
-
 .empty-state h3 {
   margin: 0 0 8px 0;
   color: #333;
   font-size: 20px;
 }
-
 .empty-state p {
   margin: 0 0 24px 0;
   color: #666;
   font-size: 15px;
 }
-
 .success {
   background: #e8f5e9;
   color: #2e7d32;
@@ -713,8 +655,6 @@ export default {
   border-radius: 8px;
   margin-top: 12px;
 }
-
-/* Modal Styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -727,7 +667,6 @@ export default {
   align-items: center;
   z-index: 2000;
 }
-
 .modal-content {
   background: white;
   padding: 32px;
@@ -738,22 +677,18 @@ export default {
   overflow-y: auto;
   box-shadow: 0 8px 32px rgba(31, 40, 95, 0.2);
 }
-
 .modal-content h2 {
   margin: 0 0 24px 0;
   color: #1F285F;
   font-size: 24px;
   font-weight: 700;
 }
-
 .modal-form {
   max-width: 600px;
 }
-
 .form-group {
   margin-bottom: 20px;
 }
-
 .form-group label {
   display: block;
   margin-bottom: 8px;
@@ -761,7 +696,6 @@ export default {
   color: #1F285F;
   font-size: 14px;
 }
-
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -773,7 +707,6 @@ export default {
   font-family: inherit;
   transition: all 0.2s;
 }
-
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
@@ -781,13 +714,11 @@ export default {
   border-color: #0288d1;
   box-shadow: 0 0 0 3px rgba(2, 136, 209, 0.1);
 }
-
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
-
 .upload-area {
   margin: 20px 0;
   padding: 32px;
@@ -797,17 +728,14 @@ export default {
   background: #fafafa;
   transition: all 0.2s;
 }
-
 .upload-area:hover {
   border-color: #0288d1;
   background: #f5f9fc;
 }
-
 .upload-area input[type="file"] {
   margin-bottom: 12px;
   font-size: 14px;
 }
-
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -816,7 +744,6 @@ export default {
   padding-top: 24px;
   border-top: 1px solid #f0f0f0;
 }
-
 .modal-actions .btn-primary {
   background: #0288d1;
   color: white;
@@ -828,19 +755,16 @@ export default {
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .modal-actions .btn-primary:hover:not(:disabled) {
   background: #0277bd;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(2, 136, 209, 0.3);
 }
-
 .modal-actions .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
-
 .modal-actions .btn-secondary {
   background: white;
   color: #666;
@@ -852,7 +776,6 @@ export default {
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .modal-actions .btn-secondary:hover {
   background: #f5f5f5;
   border-color: #ccc;

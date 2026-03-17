@@ -9,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -31,15 +33,25 @@ public class ClassService {
         return classRepository.findByProgramId(programId);
     }
 
+    // ✅ Retorna mapa { programId -> contagem } em uma única query
+    public Map<Long, Long> getClassesCountByProgram() {
+        List<Object[]> results = classRepository.countClassesGroupedByProgram();
+        Map<Long, Long> countMap = new HashMap<>();
+        for (Object[] row : results) {
+            Long programId = ((Number) row[0]).longValue();
+            Long count     = ((Number) row[1]).longValue();
+            countMap.put(programId, count);
+        }
+        return countMap;
+    }
+
     @Transactional
     public ClassModel create(ClassModel classModel) {
-        // Verifica se o programa existe
         if (classModel.getProgram() != null && classModel.getProgram().getId() != null) {
             ProgramModel program = programRepository.findById(classModel.getProgram().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Programa não encontrado"));
             classModel.setProgram(program);
         }
-        
         return classRepository.save(classModel);
     }
 
@@ -56,11 +68,9 @@ public class ClassService {
                     .orElseThrow(() -> new ResourceNotFoundException("Programa não encontrado"));
             classModel.setProgram(program);
         }
-        
         if (classDetails.getLocation() != null) {
             classModel.setLocation(classDetails.getLocation());
         }
-        
         return classRepository.save(classModel);
     }
 

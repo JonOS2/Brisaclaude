@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -24,20 +25,24 @@ public class ClassController {
 
     @GetMapping
     public ResponseEntity<List<ClassModel>> getAllClasses() {
-        List<ClassModel> classes = classService.findAll();
-        return ResponseEntity.ok(classes);
+        return ResponseEntity.ok(classService.findAll());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ClassModel> getClassById(@PathVariable Long id) {
-        ClassModel classModel = classService.findById(id);
-        return ResponseEntity.ok(classModel);
+        return ResponseEntity.ok(classService.findById(id));
     }
 
     @GetMapping("/program/{programId}")
     public ResponseEntity<List<ClassModel>> getClassesByProgramId(@PathVariable Long programId) {
-        List<ClassModel> classes = classService.findByProgramId(programId);
-        return ResponseEntity.ok(classes);
+        return ResponseEntity.ok(classService.findByProgramId(programId));
+    }
+
+    // ✅ GET /api/classes/count-by-program
+    // Retorna { programId: count } em uma única query — usado pela ProgramsView para exibir contagem de turmas
+    @GetMapping("/count-by-program")
+    public ResponseEntity<Map<Long, Long>> getClassesCountByProgram() {
+        return ResponseEntity.ok(classService.getClassesCountByProgram());
     }
 
     @PostMapping
@@ -45,15 +50,11 @@ public class ClassController {
             @RequestBody ClassModel classModel,
             HttpServletRequest request) {
         ClassModel createdClass = classService.create(classModel);
-        
         try {
             UUID userId = getUserId();
-            logHelper.logCreate("Class", createdClass.getId().toString(), 
+            logHelper.logCreate("Class", createdClass.getId().toString(),
                 createdClass.getCode(), userId, request);
-        } catch (Exception e) {
-            // Log error but don't fail the request
-        }
-        
+        } catch (Exception e) { }
         return ResponseEntity.status(HttpStatus.CREATED).body(createdClass);
     }
 
@@ -63,15 +64,11 @@ public class ClassController {
             @RequestBody ClassModel classModel,
             HttpServletRequest request) {
         ClassModel updatedClass = classService.update(id, classModel);
-        
         try {
             UUID userId = getUserId();
-            logHelper.logUpdate("Class", updatedClass.getId().toString(), 
+            logHelper.logUpdate("Class", updatedClass.getId().toString(),
                 updatedClass.getCode(), userId, request);
-        } catch (Exception e) {
-            // Log error but don't fail the request
-        }
-        
+        } catch (Exception e) { }
         return ResponseEntity.ok(updatedClass);
     }
 
@@ -83,23 +80,18 @@ public class ClassController {
             ClassModel classModel = classService.findById(id);
             UUID userId = getUserId();
             logHelper.logDelete("Class", id.toString(), classModel.getCode(), userId, request);
-        } catch (Exception e) {
-            // Log error but don't fail the request
-        }
-        
+        } catch (Exception e) { }
         classService.delete(id);
         return ResponseEntity.noContent().build();
     }
-    
+
     private UUID getUserId() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth != null && auth.getPrincipal() instanceof com.example.brisa.models.auth.UserModel) {
                 return ((com.example.brisa.models.auth.UserModel) auth.getPrincipal()).getId();
             }
-        } catch (Exception e) {
-            // Return null if can't get user
-        }
+        } catch (Exception e) { }
         return null;
     }
 }
