@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @Service
 @RequiredArgsConstructor
 public class PeopleService {
@@ -87,7 +90,24 @@ public class PeopleService {
                 // Coluna B (1): Email
                 person.setEmail(getCellValueAsString(row.getCell(1)));
 
+                // Coluna C (2): Cpf
                 person.setCpf(getCellValueAsString(row.getCell(2)));
+
+                // Coluna D (3): Data de Nascimento
+                // 1. Primeiro, pegamos o texto puro do Excel (ex: "1980-03-01")
+                String dataTexto = getCellValueAsString(row.getCell(3));
+
+                // 2. Trocamos o tradutor para ler o formato exato que veio do Excel (Ano-Mês-Dia)
+                LocalDate dataConvertida = LocalDate.parse(dataTexto, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+                // 3. Por fim, guardamos a data verdadeira e convertida dentro da pessoa
+                person.setBirthDate(dataConvertida);
+
+                // Coluna F (5): Gênero
+                person.setGender(getCellValueAsString(row.getCell(5)));
+
+                // Coluna G (6): CEP
+                person.setAddress(getCellValueAsString(row.getCell(6)));
 
                 // Adiciona apenas se tiver nome e email
                 if (person.getName() != null && !person.getName().isEmpty() 
