@@ -507,7 +507,7 @@ export default {
     };
 
     const editPerson = (person) => {
-      router.push(`/people/${person.id}`);
+      router.push(`/people/${person.id}?edit=true`);
     };
 
     const formatCPFInput = (event) => {
