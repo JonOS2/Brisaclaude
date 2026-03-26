@@ -7,13 +7,19 @@
         </svg>
         Voltar
       </button>
-      <div class="header-actions" v-if="!isEditing && person">
-        <button @click="isEditing = true" class="btn-primary">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="header-actions" v-if="person">
+        <button @click="isEditing ? handleDelete() : isEditing = true" :class="isEditing ? 'btn-danger' : 'btn-primary'">
+          <svg v-if="!isEditing" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
           </svg>
-          Editar
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+          {{ isEditing ? 'Excluir' : 'Editar' }}
         </button>
       </div>
     </div>
@@ -134,7 +140,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                 </svg>
-                Nível de Escolaridade
+                Escolaridade
               </label>
               <input 
                 v-model="editForm.educationLevel" 
@@ -151,7 +157,7 @@
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                   <circle cx="12" cy="10" r="3"></circle>
                 </svg>
-                Endereço
+                CEP
               </label>
               <input 
                 v-model="editForm.address" 
@@ -168,7 +174,7 @@
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"></path>
                   <circle cx="12" cy="9" r="2.5"></circle>
                 </svg>
-                Cidade
+                Cidade - UF
               </label>
               <input 
                 v-model="editForm.city" 
@@ -235,6 +241,9 @@ export default {
         const data = await peopleService.getById(id);
         person.value = data;
         editForm.value = { ...data };
+        if (route.query.edit === 'true') {
+          isEditing.value = true;
+        }
       } catch (err) {
         error.value = 'Erro ao carregar dados da pessoa';
         console.error(err);
@@ -269,6 +278,19 @@ export default {
       error.value = '';
     };
 
+    const handleDelete = async () => {
+      if (!confirm('Tem certeza que deseja excluir esta pessoa? Esta ação não pode ser desfeita.')) {
+        return;
+      }
+      try {
+        await peopleService.delete(person.value.id);
+        router.push('/people');
+      } catch (err) {
+        error.value = 'Erro ao excluir pessoa';
+        console.error(err);
+      }
+    };
+
     const formatCPFInput = (event) => {
       let value = event.target.value.replace(/\D/g, '');
       if (value.length > 11) value = value.slice(0, 11);
@@ -301,6 +323,7 @@ export default {
       error,
       handleSave,
       cancelEdit,
+      handleDelete,
       formatCPFInput,
       goBack
     };
@@ -532,6 +555,31 @@ export default {
 }
 
 .btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
+}
+
+.btn-danger:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(211, 47, 47, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-danger:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
