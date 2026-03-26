@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { authService } from '@/services/authService';
 import LoginView from '@/views/LoginView.vue';
+import ResetPasswordView from '@/views/ResetPasswordView.vue';
 import DashboardView from '@/views/DashboardView.vue';
 import PeopleView from '@/views/PeopleView.vue';
 import PersonDetailsView from '@/views/PersonDetailsView.vue';
@@ -16,6 +17,11 @@ const routes = [
     path: '/',
     name: 'Login',
     component: LoginView
+  },
+  {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: ResetPasswordView
   },
   {
     path: '/dashboard',
@@ -100,5 +106,6 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
+
 
 export default router;

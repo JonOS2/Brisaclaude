@@ -445,7 +445,7 @@ export default {
   grid-template-columns: 6fr 4fr;
   gap: 24px;
   margin-bottom: 40px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .map-card-centered {
@@ -482,7 +482,6 @@ export default {
   flex-direction: column;
   gap: 20px;
   height: 100%;
-  min-height: 600px;
 }
 
 .residences-title {
@@ -515,7 +514,7 @@ export default {
 }
 
 .stat-box-large .stat-label {
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 600;
   color: #888;
   letter-spacing: 0.5px;
@@ -570,12 +569,14 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 1;
 }
 
 .timeline {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
   overflow-y: auto;
   padding-right: 6px;
 }
@@ -610,12 +611,12 @@ export default {
 .timeline-content {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
   flex: 1;
 }
 
 .timeline-text {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   color: #1F285F;
   margin: 0;
@@ -623,7 +624,7 @@ export default {
 }
 
 .timeline-time {
-  font-size: 10px;
+  font-size: 13px;
   color: #888;
   font-weight: 400;
 }

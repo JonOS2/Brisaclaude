@@ -325,6 +325,7 @@ export default {
       loading,
       saving,
       error,
+      confirmDialog,
       handleSave,
       cancelEdit,
       handleDelete,

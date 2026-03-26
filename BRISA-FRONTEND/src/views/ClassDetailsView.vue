@@ -225,7 +225,8 @@ export default {
     };
 
     const deleteStage = async (stageId) => {
-      if (!confirm('Tem certeza que deseja deletar esta etapa?')) return;
+      const confirmed = await confirmDialog.value.show('Tem certeza que deseja deletar esta etapa?', 'Deletar');
+      if (!confirmed) return;
 
       try {
         await stageService.delete(stageId);
@@ -311,6 +312,7 @@ export default {
       updatingStage,
       editStageError,
       editingStage,
+      confirmDialog,
       getStageCandidatesCount,
       createStage,
       deleteStage,
