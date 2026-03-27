@@ -75,7 +75,7 @@
       <div class="footer-text">
         <p>
           Esqueceu sua senha?
-          <router-link to="/reset-password" class="reset-link">Clique aqui para recuperar.</router-link>
+          <router-link to="/reset-password" class="reset-link">Clique aqui.</router-link>
         </p>
       </div>
     </div>

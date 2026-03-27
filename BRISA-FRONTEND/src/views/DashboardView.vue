@@ -31,53 +31,149 @@
           <p class="map-hint-text">Clique nos estados para explorar as residências</p>
         </div>
 
-        <!-- Residências no Brasil à direita (30%) -->
+        <!-- Residências no Brasil à direita (40%) -->
         <div class="residences-card">
-          <h2 class="residences-title">Residências pelo Brasil</h2>
-          <div class="stats-grid-3">
-            <div class="stat-box-large">
-              <span class="stat-label">PROGRAMAS ATIVOS</span>
-              <span class="stat-number">{{ globalStats.totalPrograms }}</span>
-            </div>
-            <div class="stat-box-large">
-              <span class="stat-label">ALUNOS ATIVOS</span>
-              <span class="stat-number">{{ globalStats.totalStudents }}</span>
-            </div>
-            <div class="stat-box-large">
-              <span class="stat-label">INSTITUIÇÕES PARCEIRAS</span>
-              <span class="stat-number">{{ institutions.length }}</span>
-            </div>
-          </div>
-          
-          <!-- Estados com entidades -->
-          <div class="states-section">
-            <h3 class="subsection-title">Estados com Entidades</h3>
-            <div class="state-badges-vertical">
-              <span
-                v-for="uf in activeStates"
-                :key="uf"
-                class="state-badge-compact"
-                :style="{ background: getStateColor(uf) }"
-                @click="selectState(uf)"
-              >
-                {{ stateNames[uf] }}
-              </span>
-            </div>
-          </div>
 
-          <!-- Linha do Tempo / Atividade Recente -->
-          <div class="activity-timeline-section">
-            <h3 class="subsection-title">Atividade Recente</h3>
-            <div class="timeline">
-              <div v-for="(activity, index) in recentActivities" :key="index" class="timeline-item">
-                <div class="timeline-dot" :style="{ background: getStateColor(activity.state) }"></div>
-                <div class="timeline-content">
-                  <p class="timeline-text">{{ activity.text }}</p>
-                  <span class="timeline-time">{{ activity.time }}</span>
+          <!-- VISÃO GLOBAL (nenhum estado selecionado) -->
+          <template v-if="!selectedState">
+            <h2 class="residences-title">Residências pelo Brasil</h2>
+            <div class="stats-grid-3">
+              <div class="stat-box-large">
+                <span class="stat-label">PROGRAMAS ATIVOS</span>
+                <span class="stat-number">{{ globalStats.totalPrograms }}</span>
+              </div>
+              <div class="stat-box-large">
+                <span class="stat-label">ALUNOS ATIVOS</span>
+                <span class="stat-number">{{ globalStats.totalStudents }}</span>
+              </div>
+              <div class="stat-box-large">
+                <span class="stat-label">INSTITUIÇÕES PARCEIRAS</span>
+                <span class="stat-number">{{ institutions.length }}</span>
+              </div>
+            </div>
+
+            <div class="states-section">
+              <h3 class="subsection-title">Estados com Entidades</h3>
+              <div class="state-badges-vertical">
+                <span
+                  v-for="uf in activeStates"
+                  :key="uf"
+                  class="state-badge-compact"
+                  :style="{ background: getStateColor(uf) }"
+                  @click="selectState(uf)"
+                >
+                  {{ stateNames[uf] }}
+                </span>
+              </div>
+            </div>
+
+            <div class="activity-timeline-section">
+              <h3 class="subsection-title">Atividade Recente</h3>
+              <div class="timeline">
+                <div v-for="(activity, index) in recentActivities" :key="index" class="timeline-item">
+                  <div class="timeline-dot" :style="{ background: getStateColor(activity.state) }"></div>
+                  <div class="timeline-content">
+                    <p class="timeline-text">{{ activity.text }}</p>
+                    <span class="timeline-time">{{ activity.time }}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </template>
+
+          <!-- VISÃO DO ESTADO SELECIONADO -->
+          <template v-else>
+            <!-- Cabeçalho do estado -->
+            <div class="state-detail-header">
+              <div class="state-detail-title-row">
+                <span
+                  class="state-detail-badge"
+                  :style="{ background: getStateColor(selectedState) }"
+                >
+                  {{ selectedState }}
+                </span>
+                <h2 class="residences-title">{{ stateNames[selectedState] }}</h2>
+              </div>
+              <button class="btn-clear-state" @click="selectedState = null">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                Limpar seleção
+              </button>
+            </div>
+
+            <!-- Stats do estado -->
+            <div class="stats-grid-3">
+              <div class="stat-box-large" :style="{ borderColor: getStateColor(selectedState) + '44' }">
+                <span class="stat-label">PROGRAMAS</span>
+                <span class="stat-number" :style="{ color: getStateColor(selectedState) }">
+                  {{ stateStats.totalPrograms }}
+                </span>
+              </div>
+              <div class="stat-box-large" :style="{ borderColor: getStateColor(selectedState) + '44' }">
+                <span class="stat-label">ALUNOS</span>
+                <span class="stat-number" :style="{ color: getStateColor(selectedState) }">
+                  {{ stateStats.totalStudents }}
+                </span>
+              </div>
+              <div class="stat-box-large" :style="{ borderColor: getStateColor(selectedState) + '44' }">
+                <span class="stat-label">INSTITUIÇÕES</span>
+                <span class="stat-number" :style="{ color: getStateColor(selectedState) }">
+                  {{ stateStats.institutionCount }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Instituições do estado -->
+            <div class="states-section" v-if="stateStats.institutionNames && stateStats.institutionNames.length">
+              <h3 class="subsection-title">Instituições</h3>
+              <div class="institution-list">
+                <div
+                  v-for="inst in stateStats.institutionNames"
+                  :key="inst"
+                  class="institution-item"
+                  :style="{ borderLeftColor: getStateColor(selectedState) }"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                  {{ inst }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Turmas do estado -->
+            <div class="states-section" v-if="stateStats.classNames && stateStats.classNames.length">
+              <h3 class="subsection-title">Turmas</h3>
+              <div class="class-list">
+                <div
+                  v-for="cls in stateStats.classNames"
+                  :key="cls"
+                  class="class-item"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  {{ cls }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Sem dados -->
+            <div v-if="stateStats.totalPrograms === 0" class="empty-state-info">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <p>Nenhum dado encontrado para {{ stateNames[selectedState] }}.</p>
+            </div>
+          </template>
+
         </div>
       </div>
 
@@ -320,16 +416,19 @@ export default {
 
     const stateStats = computed(() => {
       if (!selectedState.value) return {};
-      const stateClasses = classes.value.filter(c => c.location?.state === selectedState.value);
-      const stateInstitutions = [...new Set(stateClasses.map(c => c.location?.acronym).filter(Boolean))];
+      const uf = selectedState.value;
+      const stateClasses = classes.value.filter(c => c.location?.state === uf);
+      const stateInstitutions = institutions.value.filter(i => i.state === uf);
       const totalStudents = stateClasses.reduce((acc, c) => acc + (c.enrollmentCount || 0), 0);
-      const statePrograms = [...new Set(stateClasses.map(c => c.program?.id))].length;
+      const statePrograms = new Set(stateClasses.map(c => c.program?.id).filter(Boolean)).size;
+      const institutionNames = stateInstitutions.map(i => i.name || i.acronym).filter(Boolean);
+      const classNames = stateClasses.map(c => c.name || c.code).filter(Boolean);
       return {
-        totalPrograms: statePrograms || stateInstitutions.length,
+        totalPrograms: statePrograms || stateClasses.length,
         totalStudents,
-        stage1: Math.ceil(statePrograms * 0.4) || 1,
-        stage2: statePrograms - Math.ceil(statePrograms * 0.4) || 2,
-        institutions: stateInstitutions.length ? stateInstitutions : [selectedState.value]
+        institutionCount: stateInstitutions.length,
+        institutionNames,
+        classNames
       };
     });
 
@@ -347,14 +446,13 @@ export default {
 
     const selectState = (uf) => {
       if (!activeStates.value.includes(uf)) return;
-      // Navega para a página de programas com filtro de estado
-      router.push({ name: 'programs', query: { state: uf } });
+      selectedState.value = selectedState.value === uf ? null : uf;
     };
 
     const selectStateFromModal = (uf) => {
       if (!activeStates.value.includes(uf)) return;
+      selectedState.value = selectedState.value === uf ? null : uf;
       mapModalOpen.value = false;
-      router.push({ name: 'programs', query: { state: uf } });
     };
 
     const loadData = async () => {
@@ -835,6 +933,120 @@ export default {
   cursor: pointer;
   text-decoration: underline;
   font-size: 13px;
+}
+
+/* Estado selecionado — cabeçalho */
+.state-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.state-detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.state-detail-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.btn-clear-state {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 1.5px solid #dde6f0;
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: #666;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-clear-state:hover {
+  background: #ffebee;
+  border-color: #ef9a9a;
+  color: #c62828;
+}
+
+/* Listas de instituições e turmas */
+.institution-list,
+.class-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.institution-list::-webkit-scrollbar,
+.class-list::-webkit-scrollbar {
+  width: 3px;
+}
+.institution-list::-webkit-scrollbar-thumb,
+.class-list::-webkit-scrollbar-thumb {
+  background: #dde6f0;
+  border-radius: 2px;
+}
+
+.institution-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f8fafd;
+  border-left: 3px solid #1F285F;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1F285F;
+  transition: background 0.15s;
+}
+.institution-item:hover { background: #eaf1fb; }
+.institution-item svg { color: #0288d1; flex-shrink: 0; }
+
+.class-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: #f8fafd;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #444;
+  transition: background 0.15s;
+}
+.class-item:hover { background: #eaf1fb; }
+.class-item svg { color: #888; flex-shrink: 0; }
+
+/* Empty state */
+.empty-state-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  color: #aaa;
+  text-align: center;
+}
+.empty-state-info p {
+  margin: 0;
+  font-size: 14px;
 }
 
 /* Responsive */

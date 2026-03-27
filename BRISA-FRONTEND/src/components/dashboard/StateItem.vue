@@ -19,7 +19,7 @@
         text-anchor="middle"
         pointer-events="none"
     >
-        {{ ['RJ','SE','AL','PB','RN','DF','ES','AP','RO','AC'].includes(state.id) ? state.id : state.name }}
+        {{ state.id }}
     </text>
   </g>
 </template>
