@@ -5,38 +5,31 @@
       xmlns="http://www.w3.org/2000/svg"
       class="brazil-svg"
     >
-      <g v-for="state in states" :key="state.id">
-        <path
-            :d="state.d"
-            :fill="getStateFill(state.id)"
-            :stroke="selectedState === state.id ? '#ffffff' : '#b0c4d8'"
-            :stroke-width="selectedState === state.id ? 2 : 0.5"
-            :class="['state-path', { active: isActive(state.id), selected: selectedState === state.id }]"
-            @click="click(state.id)"
-            @mouseenter="hovered = state.id"
-            @mouseleave="hovered = null"
-        >
-            <title>{{ state.name }}</title>
-        </path>
-        <text
-            :x="state.lx"
-            :y="state.ly"
-            class="state-label"
-            text-anchor="middle"
-            pointer-events="none"
-        >
-            {{ ['RJ','SE','AL','PB','RN','DF','ES','AP','RO','AC'].includes(state.id) ? state.id : state.name }}
-        </text>
-      </g>
+      <StateItem
+        v-for="state in states"
+        :key="state.id"
+        :state="state"
+        :hovered="hovered"
+        :selected-state="selectedState"
+        :active-states="activeStates"
+        :state-colors="stateColors"
+        @select="(id) => emit('select', id)"
+        @move-to-front="moveToFront"
+        @hover-leave="hovered = null"
+      />
     </svg>
   </div>
 </template>
 
 <script>
 import { ref } from 'vue';
+import StateItem from './StateItem.vue';
 
 export default {
   name: 'BrazilMap',
+  components: {
+    StateItem
+  },
   props: {
     activeStates: { type: Array, default: () => [] },
     selectedState: { type: String, default: null },
@@ -94,7 +87,16 @@ export default {
       if (isActive(id)) emit('select', id);
     };
 
-    return { hovered, states, isActive, getStateFill, click };
+    const moveToFront = (stateId, event) => {
+      hovered.value = stateId;
+      // Move the <g> element to the end of SVG so it renders on top
+      const pathElement = event.target;
+      const gElement = pathElement.parentElement;
+      const svgElement = gElement.parentElement;
+      svgElement.appendChild(gElement);
+    };
+
+    return { hovered, states, isActive, getStateFill, click, moveToFront };
   }
 };
 </script>
@@ -102,34 +104,19 @@ export default {
 <style scoped>
 .brazil-map-wrapper {
   width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 8px 0;
+  padding: 0;
+  overflow: hidden;
 }
 .brazil-svg {
-  width: 100%;
+  width: 90%;
   height: auto;
-  max-height: 100%;
+  max-height: 95%;
+  transform: scale(1.1);
+  transform-origin: center;
 }
-.state-path {
-  cursor: default;
-  transition: fill 0.2s ease;
-}
-.state-path.active {
-  cursor: pointer;
-}
-.state-path.active:hover {
-  opacity: 0.85;
-}
-.state-path.selected {
-  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.22));
-}
-.state-label {
-  font-size: 9px;
-  font-family: sans-serif;
-  fill: #445;
-  font-weight: 500;
-  user-select: none;
-}
+
 </style>

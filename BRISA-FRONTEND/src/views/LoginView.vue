@@ -37,6 +37,7 @@
             placeholder="Digite seu usuário"
             required
             autocomplete="username"
+            @keyup.enter="handleLogin"
           />
         </div>
 
@@ -55,6 +56,7 @@
             placeholder="Digite sua senha"
             required
             autocomplete="current-password"
+            @keyup.enter="handleLogin"
           />
         </div>
 
@@ -71,14 +73,17 @@
       </form>
 
       <div class="footer-text">
-      
+        <p>
+          Esqueceu sua senha?
+          <router-link to="/reset-password" class="reset-link">Clique aqui.</router-link>
+        </p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { authService } from '@/services/authService';
 
@@ -106,6 +111,18 @@ export default {
         loading.value = false;
       }
     };
+
+    const handleKeyEnter = (e) => {
+      if (e.key === 'Enter' && !loading.value) handleLogin();
+    };
+
+    onMounted(() => {
+      document.addEventListener('keydown', handleKeyEnter);
+    });
+
+    onUnmounted(() => {
+      document.removeEventListener('keydown', handleKeyEnter);
+    });
 
     return {
       credentials,
@@ -309,6 +326,18 @@ h1 {
 .footer-text p {
   margin: 0;
   color: #999;
-  font-size: 13px;
+  font-size: 16.5px;
+}
+
+.reset-link {
+  color: #0288d1;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.reset-link:hover {
+  color: #1F285F;
+  text-decoration: underline;
 }
 </style>

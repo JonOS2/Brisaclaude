@@ -1,5 +1,6 @@
 <template>
   <div class="class-details-view">
+    <ConfirmDialog ref="confirmDialog" />
     <div v-if="loading" class="loading">Carregando...</div>
     
     <div v-else-if="error" class="error">{{ error }}</div>
@@ -139,9 +140,11 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { classService } from '@/services/classService';
 import { stageService } from '@/services/stageService';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 
 export default {
   name: 'ClassDetailsView',
+  components: { ConfirmDialog },
   setup() {
     const route = useRoute();
     const router = useRouter();
@@ -159,6 +162,7 @@ export default {
     const showEditStageModal = ref(false);
     const updatingStage = ref(false);
     const editStageError = ref(null);
+    const confirmDialog = ref();
 
     const newStage = ref({
       name: '',
@@ -221,7 +225,8 @@ export default {
     };
 
     const deleteStage = async (stageId) => {
-      if (!confirm('Tem certeza que deseja deletar esta etapa?')) return;
+      const confirmed = await confirmDialog.value.show('Tem certeza que deseja deletar esta etapa?', 'Deletar');
+      if (!confirmed) return;
 
       try {
         await stageService.delete(stageId);
@@ -307,6 +312,7 @@ export default {
       updatingStage,
       editStageError,
       editingStage,
+      confirmDialog,
       getStageCandidatesCount,
       createStage,
       deleteStage,

@@ -1,5 +1,6 @@
 <template>
   <div class="person-details-view">
+    <ConfirmDialog ref="confirmDialog" />
     <div class="header">
       <button @click="goBack" class="btn-back">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -211,9 +212,11 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { peopleService } from '@/services/peopleService';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 
 export default {
   name: 'PersonDetailsView',
+  components: { ConfirmDialog },
   setup() {
     const route = useRoute();
     const router = useRouter();
@@ -232,6 +235,7 @@ export default {
     const loading = ref(true);
     const saving = ref(false);
     const error = ref('');
+    const confirmDialog = ref();
 
     const loadPerson = async () => {
       try {
@@ -279,9 +283,9 @@ export default {
     };
 
     const handleDelete = async () => {
-      if (!confirm('Tem certeza que deseja excluir esta pessoa? Esta ação não pode ser desfeita.')) {
-        return;
-      }
+      const confirmed = await confirmDialog.value.show('Tem certeza que deseja excluir esta pessoa? Esta ação não pode ser desfeita.', 'Excluir');
+      if (!confirmed) return;
+      
       try {
         await peopleService.delete(person.value.id);
         router.push('/people');
@@ -321,6 +325,7 @@ export default {
       loading,
       saving,
       error,
+      confirmDialog,
       handleSave,
       cancelEdit,
       handleDelete,
