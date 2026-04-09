@@ -1,5 +1,6 @@
 package com.example.brisa.controllers;
 
+import com.example.brisa.dtos.analytics.CourseCompletionTimelineDTO;
 import com.example.brisa.dtos.analytics.CourseProgressionFunnelDTO;
 import com.example.brisa.services.AnalyticsService;
 import lombok.RequiredArgsConstructor;
@@ -23,5 +24,14 @@ public class AnalyticsController {
             @RequestParam(required = false) String stage
     ) {
         return ResponseEntity.ok(analyticsService.getCourseProgressionFunnel(classId, stageId, stage));
+    }
+
+    @GetMapping("/course-completions")
+    public ResponseEntity<List<CourseCompletionTimelineDTO>> getCourseCompletions(
+        @RequestParam(required = false) Long classId,
+        @RequestParam(required = false) Long stageId,
+        @RequestParam(defaultValue = "week") String granularity
+    ) {
+        return ResponseEntity.ok(analyticsService.getCourseCompletions(classId, stageId, granularity));
     }
 }

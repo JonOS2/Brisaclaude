@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,4 +62,34 @@ public interface CourseProgressionRepository extends JpaRepository<CourseProgres
         GROUP BY cp.status
     """)
     List<Object[]> countStatusByStage(@Param("stageId") Long stageId);
+
+        @Query("""
+                SELECT cp.date
+                FROM CourseProgressionModel cp
+                WHERE cp.date IS NOT NULL
+                    AND LOWER(cp.status) IN ('concluído', 'concluido')
+        """)
+        List<LocalDate> findCompletionDates();
+
+        @Query("""
+                SELECT cp.date
+                FROM CourseProgressionModel cp
+                WHERE cp.date IS NOT NULL
+                    AND LOWER(cp.status) IN ('concluído', 'concluido')
+                    AND cp.people.id IN (
+                        SELECT e.people.id FROM EnrollmentModel e WHERE e.classModel.id = :classId
+                    )
+        """)
+        List<LocalDate> findCompletionDatesByClass(@Param("classId") Long classId);
+
+        @Query("""
+                SELECT cp.date
+                FROM CourseProgressionModel cp
+                WHERE cp.date IS NOT NULL
+                    AND LOWER(cp.status) IN ('concluído', 'concluido')
+                    AND cp.people.id IN (
+                        SELECT sc.people.id FROM StageCandidateModel sc WHERE sc.stage.id = :stageId
+                    )
+        """)
+        List<LocalDate> findCompletionDatesByStage(@Param("stageId") Long stageId);
 }

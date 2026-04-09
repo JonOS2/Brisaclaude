@@ -806,7 +806,9 @@ export default {
       // use pointerdown to catch outside clicks earlier
       document.addEventListener('pointerdown', handleDocumentClick);
       await loadStageDetails();
-      if (route.query && (route.query.openAdd === 'true' || route.query.openAdd === true)) {
+      const shouldOpenAddFromQuery = route.query && (route.query.openAdd === 'true' || route.query.openAdd === true);
+      const hasNoCandidates = !Array.isArray(candidates.value) || candidates.value.length === 0;
+      if (shouldOpenAddFromQuery && hasNoCandidates) {
         showAddCandidatesModal.value = true;
       }
     });

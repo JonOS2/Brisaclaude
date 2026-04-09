@@ -27,6 +27,7 @@
             </div>
 
             <CourseProgressionFunnel :classId="selectedClassId" :stageId="selectedStageId" />
+            <CourseCompletionTimeline :classId="selectedClassId" :stageId="selectedStageId" />
           </div>
           <p v-else class="hint-text">Escolha uma turma para ver o funil de progresso.</p>
         </div>
@@ -40,10 +41,11 @@ import { useRouter } from 'vue-router';
 import { classService } from '../services/classService';
 import { stageService } from '../services/stageService';
 import CourseProgressionFunnel from '../components/analytics/CourseProgressionFunnel.vue';
+import CourseCompletionTimeline from '../components/analytics/CourseCompletionTimeline.vue';
 
 export default {
   name: 'DashboardsView',
-  components: { CourseProgressionFunnel },
+  components: { CourseProgressionFunnel, CourseCompletionTimeline },
   setup() {
     const classes = ref([]);
     const selectedClassId = ref(null);

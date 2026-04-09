@@ -12,5 +12,19 @@ export const analyticsService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  async getCourseCompletions(options = {}) {
+    try {
+      const params = {};
+      if (options.classId) params.classId = options.classId;
+      if (options.stageId) params.stageId = options.stageId;
+      if (options.granularity) params.granularity = options.granularity;
+
+      const response = await api.get('/analytics/course-completions', { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
