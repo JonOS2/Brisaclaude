@@ -8,15 +8,20 @@ import com.example.brisa.dtos.course.CourseProgressionImportResponseDTO;
 import com.example.brisa.dtos.course.CourseStudentProgressionDTO;
 import com.example.brisa.exceptions.ResourceNotFoundException;
 import com.example.brisa.models.EnrollmentModel;
+import com.example.brisa.models.PeopleModel;
+import com.example.brisa.models.StageCandidateModel;
 import com.example.brisa.models.course.CourseAssignmentModel;
 import com.example.brisa.models.course.CourseModel;
 import com.example.brisa.models.course.CourseProgressionModel;
+import com.example.brisa.models.roles.AcademicRoleModel;
+import com.example.brisa.repositories.AcademicRoleRepository;
 import com.example.brisa.repositories.ClassRepository;
 import com.example.brisa.repositories.CourseAssignmentRepository;
 import com.example.brisa.repositories.CourseProgressionRepository;
 import com.example.brisa.repositories.CourseRepository;
 import com.example.brisa.repositories.EnrollmentRepository;
 import com.example.brisa.repositories.KnowledgeAreaRepository;
+import com.example.brisa.repositories.StageCandidateRepository;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -55,6 +60,8 @@ public class CourseService {
     private final CourseAssignmentRepository courseAssignmentRepository;
     private final ClassRepository classRepository;
     private final KnowledgeAreaRepository knowledgeAreaRepository;
+    private final StageCandidateRepository stageCandidateRepository;
+    private final AcademicRoleRepository academicRoleRepository;
 
     public List<CourseModel> findAll() {
         return courseRepository.findAll();
@@ -261,6 +268,7 @@ public class CourseService {
                     newAssignment.setClassModel(classModel);
                     newAssignment.setRequired(true);
                     courseAssignmentRepository.save(newAssignment);
+                    backfillProgressionsForAssignedCourse(course, classId);
                     assignedCourses++;
                 } else {
                     alreadyAssigned++;
@@ -280,6 +288,9 @@ public class CourseService {
 
     @Transactional
     public CourseProgressionImportResponseDTO importProgressionsFromExcel(Long classId, MultipartFile file) throws IOException {
+        com.example.brisa.models.ClassModel classModel = classRepository.findById(classId)
+            .orElseThrow(() -> new ResourceNotFoundException("Turma não encontrada"));
+
         int totalProcessed = 0;
         int createdProgressions = 0;
         int updatedProgressions = 0;
@@ -297,6 +308,17 @@ public class CourseService {
                         e -> e,
                         (a, b) -> a
                 ));
+
+        Map<String, PeopleModel> stagePeopleByCpf = stageCandidateRepository.findByClassIdWithPeople(classId).stream()
+            .filter(sc -> sc.getPeople() != null && sc.getPeople().getCpf() != null)
+            .collect(Collectors.toMap(
+                sc -> normalizeCpf(sc.getPeople().getCpf()),
+                StageCandidateModel::getPeople,
+                (a, b) -> a
+            ));
+
+        AcademicRoleModel alunoRole = academicRoleRepository.findByName("ALUNO")
+            .orElseGet(() -> academicRoleRepository.save(new AcademicRoleModel("ALUNO", "Aluno")));
 
         Map<Long, EnrollmentModel> enrollmentsToUpdate = new HashMap<>();
 
@@ -332,9 +354,21 @@ public class CourseService {
                 CourseModel course = courseOpt.get();
                 EnrollmentModel enrollment = enrollmentByCpf.get(normalizeCpf(cpf));
                 if (enrollment == null || enrollment.getPeople() == null) {
-                    peopleNotInClassCpfs.add(cpf);
-                    skippedRows++;
-                    continue;
+                    PeopleModel candidatePerson = stagePeopleByCpf.get(normalizeCpf(cpf));
+                    if (candidatePerson != null) {
+                        EnrollmentModel newEnrollment = new EnrollmentModel();
+                        newEnrollment.setPeople(candidatePerson);
+                        newEnrollment.setClassModel(classModel);
+                        newEnrollment.setAcademicRole(alunoRole);
+                        newEnrollment.setEnrollmentDate(LocalDate.now());
+                        newEnrollment.setStatus("MATRICULADO");
+                        enrollment = enrollmentRepository.save(newEnrollment);
+                        enrollmentByCpf.put(normalizeCpf(cpf), enrollment);
+                    } else {
+                        peopleNotInClassCpfs.add(cpf);
+                        skippedRows++;
+                        continue;
+                    }
                 }
 
                 CourseAssignmentModel assignment = courseAssignmentRepository
@@ -538,7 +572,9 @@ public class CourseService {
                 courseAssignmentRepository.save(existingAssignment);
             }
         }
-        // Backfill removed: progressões não serão criadas automaticamente a partir de agora.
+
+        // Create missing "not started" progressions for all enrolled students in the class.
+        backfillProgressionsForAssignedCourse(course, classId);
     }
 
     // Retorna associações (assignments) para uma turma
@@ -574,6 +610,44 @@ public class CourseService {
                 .replace("${message}",              message)
                 .replace("${courseName}",           courseName)
                 .replace("${completionPercentage}", String.valueOf(completionPercentage));
+    }
+
+    private void backfillProgressionsForAssignedCourse(CourseModel course, Long classId) {
+        List<EnrollmentModel> enrollments = enrollmentRepository.findByClassModelId(classId);
+        if (enrollments == null || enrollments.isEmpty()) {
+            return;
+        }
+
+        Set<Long> existingPeopleIds = courseProgressionRepository
+                .findByCourseIdAndClassId(course.getId(), classId)
+                .stream()
+                .filter(p -> p.getPeople() != null && p.getPeople().getId() != null)
+                .map(p -> p.getPeople().getId())
+                .collect(Collectors.toSet());
+
+        List<CourseProgressionModel> toCreate = new ArrayList<>();
+
+        for (EnrollmentModel enrollment : enrollments) {
+            if (enrollment.getPeople() == null || enrollment.getPeople().getId() == null) continue;
+
+            Long peopleId = enrollment.getPeople().getId();
+            if (existingPeopleIds.contains(peopleId)) continue;
+
+            CourseProgressionModel progression = new CourseProgressionModel();
+            progression.setCourse(course);
+            progression.setPeople(enrollment.getPeople());
+            progression.setDate(LocalDate.now());
+            progression.setCompletionPercentage(0.0);
+            progression.setStatus("não iniciado");
+            progression.setLastAccess(null);
+            toCreate.add(progression);
+
+            existingPeopleIds.add(peopleId);
+        }
+
+        if (!toCreate.isEmpty()) {
+            courseProgressionRepository.saveAll(toCreate);
+        }
     }
 
     private com.example.brisa.models.KnowledgeAreaModel getOrCreateKnowledgeArea(String name) {

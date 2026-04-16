@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -23,4 +22,12 @@ public interface StageCandidateRepository extends JpaRepository<StageCandidateMo
     
     @Query("SELECT sc.stage.id as stageId, COUNT(sc) as count FROM StageCandidateModel sc WHERE sc.stage.classModel.id = :classId GROUP BY sc.stage.id")
     List<Object[]> countCandidatesByClassId(@Param("classId") Long classId);
+
+    @Query("""
+        SELECT DISTINCT sc
+        FROM StageCandidateModel sc
+        JOIN FETCH sc.people p
+        WHERE sc.stage.classModel.id = :classId
+    """)
+    List<StageCandidateModel> findByClassIdWithPeople(@Param("classId") Long classId);
 }
