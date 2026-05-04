@@ -1,0 +1,11 @@
+<template>
+  <nav data-slot="navigation-menu" class="relative" v-bind="$attrs">
+    <slot />
+  </nav>
+</template>
+
+<script setup lang="ts">
+</script>
+
+<style scoped>
+</style>
