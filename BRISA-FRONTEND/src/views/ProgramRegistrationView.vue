@@ -1,30 +1,12 @@
 <template>
-  <!-- 
-    =======================================================================
-    CONTAINER PRINCIPAL DA VIEW
-    Envolve toda a aplicação de cadastro de programas.
-    =======================================================================
-  -->
   <div class="program-registration-view">
     
-    <!-- 
-      OVERLAY DO CALENDÁRIO
-      Uma div invisível que cobre a tela toda por trás do calendário. 
-      Sua única função é capturar o clique do usuário fora do calendário para fechá-lo.
-    -->
     <div 
       v-if="activeDatePicker" 
       class="picker-overlay" 
       @click="closeDatePicker"
     ></div>
 
-    <!-- 
-      =======================================================================
-      MODAIS DO SISTEMA (ADICIONAR / EDITAR / EXCLUIR ETAPA E CAMPOS)
-      =======================================================================
-    -->
-
-    <!-- MODAL: Adicionar Nova Etapa -->
     <div 
       v-if="showNewStageModal" 
       class="modal-overlay" 
@@ -127,7 +109,6 @@
        </div>
     </div>
 
-    <!-- MODAL: Editar Etapa Existente -->
     <div 
       v-if="showEditStageModal" 
       class="modal-overlay" 
@@ -198,7 +179,6 @@
        </div>
     </div>
 
-    <!-- MODAL: Confirmar Exclusão de Etapa -->
     <div 
       v-if="showDeleteConfirmModal" 
       class="modal-overlay" 
@@ -231,7 +211,6 @@
        </div>
     </div>
 
-    <!-- MODAL: Adicionar Campo Personalizado (Aba 3) -->
     <div 
       v-if="showCustomFieldModal" 
       class="modal-overlay" 
@@ -296,7 +275,6 @@
        </div>
     </div>
 
-    <!-- MODAL: Adicionar Documento Personalizado (Aba 3) -->
     <div 
       v-if="showCustomDocumentModal" 
       class="modal-overlay" 
@@ -336,7 +314,6 @@
                <div class="form-group" style="margin-bottom: 0;">
                  <label>Tipos Aceitos <span class="required">*</span></label>
                  
-                 <!-- Múltipla escolha interativa via "Pills" -->
                  <div :class="['doc-types-container', { 'error-border': customDocumentTypeError }]">
                     <span 
                       v-for="docType in availableDocTypes" 
@@ -370,7 +347,6 @@
        </div>
     </div>
 
-    <!-- MODAL: Adicionar Novo Curso (Aba 4) -->
     <div 
       v-if="showNewCourseModal" 
       class="modal-overlay" 
@@ -391,7 +367,6 @@
           </div>
           
           <div class="modal-body">
-             <!-- Linha 1: Proporção 3:1 para melhor uso do espaço -->
              <div class="form-row" style="display: grid; grid-template-columns: 3fr 1fr; gap: 16px; margin-bottom: 16px;">
                <div class="form-group relative" style="margin-bottom: 0;">
                  <label>Nome do Curso <span class="required">*</span></label>
@@ -419,7 +394,6 @@
                </div>
              </div>
 
-             <!-- Linha 2: Flexbox para espaçamento simétrico dos toggles e alinhamento do Status à direita -->
              <div class="form-row" style="display: flex; align-items: flex-start; gap: 32px; margin-bottom: 0;">
                <div class="form-group" style="margin-bottom: 0;">
                  <label>Obrigatório?</label>
@@ -454,11 +428,6 @@
        </div>
     </div>
 
-    <!-- 
-      =======================================================================
-      CABEÇALHO DA PÁGINA FIXO
-      =======================================================================
-    -->
     <div class="header">
       <div class="header-left">
         <h1>Cadastro de Programa</h1>
@@ -466,22 +435,14 @@
       </div>
     </div>
 
-    <!-- 
-      =======================================================================
-      CONTAINER DE GRID PRINCIPAL (3 COLUNAS)
-      =======================================================================
-    -->
     <div class="registration-container">
       
-      <!-- COLUNA 1: SIDEBAR DE NAVEGAÇÃO -->
       <div class="sidebar">
         <div class="steps">
           
-          <!-- Loop dinâmico para renderizar os botões da barra lateral -->
           <div v-for="(title, index) in stepTitles" :key="index">
             <div :class="['step', { active: currentStep === index + 1, completed: currentStep > index + 1 }]" @click="goToStep(index + 1)">
                <div :class="['step-icon', { outline: currentStep < index + 1 }]">
-                  <!-- Ícone Padrão de Documento para todas as etapas -->
                   <svg v-if="currentStep > index + 1" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
@@ -501,12 +462,8 @@
         </div>
       </div>
 
-      <!-- COLUNA 2: CONTEÚDO CENTRAL (Formulários) -->
       <div class="content">
         
-        <!-- ========================================== -->
-        <!-- VIEW DA ABA 1: DADOS GERAIS DO PROGRAMA    -->
-        <!-- ========================================== -->
         <div v-if="currentStep === 1" class="step-container">
           
           <div class="step-header">
@@ -514,7 +471,6 @@
              <p>Preencha as informações gerais do edital e do programa</p>
           </div>
 
-          <!-- CARD: Informações Básicas -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Informações Básicas</h3>
@@ -543,7 +499,6 @@
              </div>
           </div>
 
-          <!-- CARD: Parceiros e Tags -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Parceiros</h3>
@@ -578,7 +533,6 @@
              </div>
           </div>
 
-          <!-- CARD: Localidade e Contato -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Localidade e Contato</h3>
@@ -613,7 +567,6 @@
              </div>
           </div>
 
-          <!-- CARD: Datas e Prazos com Lógica Complexa de Calendário -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Datas e Prazos</h3>
@@ -622,7 +575,6 @@
              
              <div class="form-row date-row">
                
-               <!-- 1. Data de Publicação -->
                <div class="form-group relative date-field">
                  <label>Data de Publicação</label>
                  <div class="date-input-wrapper">
@@ -640,7 +592,6 @@
                    </svg>
                  </div>
                  
-                 <!-- Pop-up do Calendário Vue -->
                  <div v-if="activeDatePicker === 'publishDate'" class="custom-calendar">
                     <div class="calendar-header">
                        <button type="button" class="cal-btn" @click.stop="prevMonth">‹</button>
@@ -661,7 +612,6 @@
                  </div>
                </div>
 
-               <!-- 2. Início das Inscrições -->
                <div class="form-group relative date-field">
                  <label>Início das Inscrições <span class="required">*</span></label>
                  <div class="date-input-wrapper">
@@ -699,7 +649,6 @@
                  </div>
                </div>
 
-               <!-- 3. Fim das Inscrições -->
                <div class="form-group relative date-field">
                  <label>Fim das Inscrições <span class="required">*</span></label>
                  <div class="date-input-wrapper">
@@ -740,7 +689,6 @@
              </div>
           </div>
 
-          <!-- CARD: Status e Observações -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Status e Observações</h3>
@@ -760,9 +708,6 @@
           </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VIEW DA ETAPA 2: ESTRUTURA DAS ETAPAS      -->
-        <!-- ========================================== -->
         <div v-else-if="currentStep === 2" class="step-container">
           
           <div class="step-header">
@@ -770,7 +715,6 @@
              <p>Configure as etapas do processo seletivo</p>
           </div>
 
-          <!-- Alerta de Orientação Azul Claro -->
           <div class="info-alert">
              <div class="alert-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -783,7 +727,6 @@
              </div>
           </div>
 
-          <!-- Lista de Cartões (Cards) das Etapas Criadas com Drag and Drop -->
           <div class="stages-list">
              <div 
                class="stage-card" 
@@ -798,7 +741,6 @@
                :class="{ 'is-dragged': draggedStageIndex === index, 'is-dragover': draggedOverStageIndex === index }"
              >
                 
-                <!-- Área esquerda do card para arrastar (Drag Handle visual) -->
                 <div class="stage-drag-handle">
                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                      <circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle>
@@ -809,7 +751,6 @@
                 <div class="stage-body">
                    
                    <div class="stage-header">
-                      <!-- Número redondo azul da Etapa -->
                       <div class="stage-number">{{ stage.id }}</div>
                       
                       <div class="stage-titles">
@@ -823,7 +764,6 @@
                    
                    <p class="stage-description">{{ stage.desc }}</p>
                    
-                   <!-- Sub-grid com os atributos da etapa (Modalidade, Duração, Vagas) -->
                    <div class="stage-info-grid">
                       <div class="info-item">
                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -857,7 +797,6 @@
                       </div>
                    </div>
 
-                   <!-- Botões de Ação Específicos para este Card -->
                    <div class="stage-actions">
                       <button class="btn-stage-action" @click="openEditStageModal(stage)">
                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -884,7 +823,6 @@
              </div>
           </div>
 
-          <!-- Botões Gerais da Seção de Etapas -->
           <div class="stage-list-actions">
              <button class="btn-action-outline" @click="openNewStageModal">
                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -901,9 +839,6 @@
           </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VIEW DA ETAPA 3: ETAPA 0 - INSC REINSCRIÇÃO-->
-        <!-- ========================================== -->
         <div v-else-if="currentStep === 3" class="step-container">
           
           <div class="step-header">
@@ -911,7 +846,6 @@
              <p>Configure o formulário de inscrição e elegibilidade</p>
           </div>
 
-          <!-- CARD 1: Informações da Etapa -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Informações da Etapa</h3>
@@ -986,7 +920,6 @@
              </div>
           </div>
 
-          <!-- CARD 2: Elegibilidade -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Elegibilidade</h3>
@@ -1003,7 +936,6 @@
                <textarea v-model="inscriptionForm.educationReqs" placeholder="Ex: Ensino médio completo, graduação em andamento..." class="form-textarea" rows="2"></textarea>
              </div>
 
-             <!-- Lista de Toggles de Configuração Simples -->
              <div class="list-item-row toggle-row-simple">
                <span class="list-item-title">Exigir LinkedIn?</span>
                <label class="toggle-switch">
@@ -1029,18 +961,15 @@
              </div>
           </div>
 
-          <!-- CARD 3: Formulário de Inscrição (Lista de Campos) -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Formulário de Inscrição</h3>
                 <p>Campos que o candidato deverá preencher</p>
              </div>
              
-             <!-- Iteração sobre os campos configuráveis do formulário -->
              <div v-for="(field, index) in inscriptionForm.fields" :key="'field-'+index" class="list-item-row">
                 <div class="list-item-info">
                    <span class="list-item-title">{{ field.name }}</span>
-                   <!-- Exibe a tag vermelha apenas se o switch estiver ativado -->
                    <span v-if="field.required" class="badge-required">Obrigatório</span>
                 </div>
                 <label class="toggle-switch">
@@ -1054,7 +983,6 @@
              </button>
           </div>
 
-          <!-- CARD 4: Documentos Exigidos -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Documentos Exigidos</h3>
@@ -1077,13 +1005,11 @@
                 </div>
              </div>
              
-             <!-- Botão que aciona o novo Modal -->
              <button class="btn-dashed-add" @click="openCustomDocumentModal">
                <span>+</span> Adicionar Documento
              </button>
           </div>
 
-          <!-- CARD 5: Configuração de Cotas -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Configuração de Cotas</h3>
@@ -1142,14 +1068,12 @@
              </div>
           </div>
 
-          <!-- CARD 6: Classificação para a Próxima Etapa -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Classificação para a Próxima Etapa</h3>
                 <p>Configure a seleção de candidatos para o nivelamento</p>
              </div>
              
-             <!-- Caixa destacada verde claro com o toggle principal -->
              <div class="green-toggle-box">
                 <span class="list-item-title" style="color: #065f46;">Esta etapa seleciona candidatos para a próxima?</span>
                 <label class="toggle-switch">
@@ -1201,9 +1125,6 @@
           </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- VIEW DA ETAPA 4: ETAPA 1 - NIVELAMENTO     -->
-        <!-- ========================================== -->
         <div v-else-if="currentStep === 4" class="step-container">
           
           <div class="step-header">
@@ -1211,7 +1132,6 @@
              <p>Configure os cursos, avaliações e critérios de aprovação</p>
           </div>
 
-          <!-- CARD 1: Configuração Geral -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Configuração Geral</h3>
@@ -1285,21 +1205,18 @@
              </div>
           </div>
 
-          <!-- CARD 2: Cursos do Nivelamento -->
           <div class="card-section">
              <div class="section-title" style="margin-bottom: 8px;">
                 <h3>Cursos do Nivelamento</h3>
                 <p>Configure os cursos obrigatórios e opcionais</p>
              </div>
              
-             <!-- Contadores Dinâmicos -->
              <div style="font-size: 13px; margin-bottom: 16px;">
                 <span style="color: #0d9488; font-weight: 500;">{{ reqCoursesCount }} obrigatórios</span> 
                 <span style="color: #d1d5db; margin: 0 8px;">|</span> 
                 <span style="color: #6b7280;">{{ optCoursesCount }} opcionais</span>
              </div>
 
-             <!-- Lista de Cursos (Tabela CSS Grid) -->
              <div class="course-table">
                 <div class="course-header">
                    <span>Curso</span>
@@ -1334,7 +1251,6 @@
              </button>
           </div>
 
-          <!-- CARD 3: Regra de Conclusão -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Regra de Conclusão dos Cursos</h3>
@@ -1356,7 +1272,6 @@
                  <span class="toggle-slider"></span>
                </label>
              </div>
-             <!-- Input que aparece condicionalmente -->
              <div v-if="nivelamentoForm.completionRules.requireMinScore" class="form-group" style="margin-top: 0; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6;">
                <input v-model="nivelamentoForm.completionRules.minScoreValue" type="text" class="form-input" style="background-color: #f9fafb;"/>
              </div>
@@ -1370,14 +1285,12 @@
              </div>
           </div>
 
-          <!-- CARD 4: Prova Final -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Prova Final</h3>
                 <p>Configuração da avaliação final da etapa</p>
              </div>
              
-             <!-- Caixa destacada verde claro com o toggle principal -->
              <div class="green-toggle-box">
                 <span class="list-item-title" style="color: #065f46;">Habilitar prova final</span>
                 <label class="toggle-switch">
@@ -1464,14 +1377,11 @@
              </div>
           </div>
 
-          <!-- CARD 5: Cálculo da Nota e Aprovação -->
-          <div class="card-section" style="border: 1px solid #a7f3d0;"> <!-- Borda verdinha sugerida no design -->
-             <div class="section-title">
+          <div class="card-section" style="border: 1px solid #e5e7eb;"> <div class="section-title">
                 <h3 style="color: #0f172a;">Cálculo da Nota e Aprovação</h3>
                 <p>Configure a fórmula de pontuação e critérios de classificação</p>
              </div>
              
-             <!-- Box Escuro da Fórmula -->
              <div class="formula-box">
                <span class="formula-label">Fórmula de Cálculo</span>
                <div class="formula-text">
@@ -1479,30 +1389,42 @@
                </div>
              </div>
              
-             <!-- Range Sliders -->
              <div class="form-group" style="margin-bottom: 24px;">
                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                  <label style="margin: 0;">Pontuação Máxima da Prova (%)</label>
                  <div style="display: flex; align-items: center; gap: 6px;">
-                   <input type="number" v-model="nivelamentoForm.grading.examWeight" class="quota-input" style="color: #0d9488; font-weight: 600; padding: 4px 8px; width: 60px; text-align: center;" min="0" max="100" />
+                   <input 
+                     type="number" 
+                     v-model="nivelamentoForm.grading.examWeight" 
+                     @keydown.enter="$event.target.blur()"
+                     class="quota-input" 
+                     style="color: #0d9488; font-weight: 500; padding: 4px 8px; width: 60px; text-align: center;" 
+                     min="0" max="100" 
+                   />
                    <span style="font-size: 13px; color: #0d9488; font-weight: 500;">%</span>
                  </div>
                </div>
-                <input 
-                  type="number" 
-                  v-model="nivelamentoForm.grading.examWeight" 
-                  @keydown.enter="$event.target.blur()" 
-                  class="quota-input" 
-                  style="color: #0d9488; font-weight: 500; padding: 4px 8px; width: 60px; text-align: center;" 
-                  min="0" max="100" 
-                />
+               <input 
+                 type="range" 
+                 v-model="nivelamentoForm.grading.examWeight" 
+                 class="form-range" 
+                 min="0" max="100"
+                 :style="{ background: `linear-gradient(to right, #1e1b4b ${nivelamentoForm.grading.examWeight}%, #e5e7eb ${nivelamentoForm.grading.examWeight}%)` }"
+               >
              </div>
 
              <div class="form-group" style="margin-bottom: 24px;">
                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                  <label style="margin: 0;">Pontos por Cursos Não Obrigatórios (%)</label>
                  <div style="display: flex; align-items: center; gap: 6px;">
-                   <input type="number" v-model="nivelamentoForm.grading.optionalWeight" class="quota-input" style="color: #0d9488; font-weight: 600; padding: 4px 8px; width: 60px; text-align: center;" min="0" max="100" />
+                   <input 
+                     type="number" 
+                     v-model="nivelamentoForm.grading.optionalWeight" 
+                     @keydown.enter="$event.target.blur()"
+                     class="quota-input" 
+                     style="color: #0d9488; font-weight: 500; padding: 4px 8px; width: 60px; text-align: center;" 
+                     min="0" max="100" 
+                   />
                    <span style="font-size: 13px; color: #0d9488; font-weight: 500;">%</span>
                  </div>
                </div>
@@ -1524,7 +1446,14 @@
                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                  <label style="margin: 0;">Nota Mínima para Aprovação</label>
                  <div style="display: flex; align-items: center; gap: 6px;">
-                   <input type="number" v-model="nivelamentoForm.grading.minPassingScore" class="quota-input" style="color: #0d9488; font-weight: 600; padding: 4px 8px; width: 60px; text-align: center;" min="0" max="100" />
+                   <input 
+                     type="number" 
+                     v-model="nivelamentoForm.grading.minPassingScore" 
+                     @keydown.enter="$event.target.blur()"
+                     class="quota-input" 
+                     style="color: #0d9488; font-weight: 500; padding: 4px 8px; width: 60px; text-align: center;" 
+                     min="0" max="100" 
+                   />
                    <span style="font-size: 13px; color: #0d9488; font-weight: 500;">pontos</span>
                  </div>
                </div>
@@ -1575,7 +1504,6 @@
              </div>
           </div>
 
-          <!-- CARD 6: Certificação -->
           <div class="card-section">
              <div class="section-title">
                 <h3>Certificação</h3>
@@ -1606,9 +1534,6 @@
 
         </div>
 
-        <!-- ========================================== -->
-        <!-- PLACEHOLDER TEMPORÁRIO PARA OUTRAS ETAPAS  -->
-        <!-- ========================================== -->
         <div v-else class="step-container">
            <div class="step-header">
              <h2>Etapa {{ currentStep }}</h2>
@@ -1616,16 +1541,11 @@
            </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- RODAPÉ DINÂMICO DE NAVEGAÇÃO DA COLUNA 2   -->
-        <!-- ========================================== -->
         <div class="form-actions-footer">
-           <!-- Renderiza condicionalmente o botão voltar caso não esteja na aba 1 -->
            <button v-if="currentStep > 1" class="btn-footer-back" @click="prevStep">
              Voltar
            </button>
 
-           <!-- Se estiver até a aba 5, mostra "Continuar ->". Se na aba 6, mostra "Finalizar" -->
            <button v-if="currentStep < 6" class="btn-footer-continue ml-auto" @click="nextStep">
              Continuar →
            </button>
@@ -1636,14 +1556,8 @@
 
       </div>
 
-      <!-- 
-        =======================================================================
-        COLUNA 3: SIDEBAR DIREITA (RESUMO DO EDITAL)
-        =======================================================================
-      -->
       <div class="summary-sidebar">
          
-         <!-- Botão Fixo de Salvar Rascunho -->
          <div class="sidebar-actions">
             <button class="btn-sidebar-draft">
                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1667,7 +1581,6 @@
          <div class="summary-block">
             <span class="summary-label">Etapas do Processo</span>
             
-            <!-- Timeline Dinâmica: Renderiza o resumo baseado na lista de etapas criada pelo usuário -->
             <div class="timeline">
                <template v-for="(stage, index) in stageList" :key="stage.id">
                  <div class="timeline-item">
@@ -1678,13 +1591,11 @@
                        <span class="timeline-tag">{{ stage.slots }}</span>
                     </div>
                  </div>
-                 <!-- Renderiza a linha conectora apenas se não for o último item da lista -->
                  <div v-if="index < stageList.length - 1" class="timeline-line"></div>
                </template>
             </div>
          </div>
 
-         <!-- Horário de Atualização Dinâmico -->
          <div class="summary-footer">
             Última atualização: Hoje às {{ lastUpdatedTime }}
          </div>
@@ -2445,8 +2356,7 @@ export default {
 </script>
 
 <style scoped>
-/* 
-=======================================================================
+/* =======================================================================
 1. RESET E ESTRUTURA GERAL
 =======================================================================
 */
@@ -2468,8 +2378,7 @@ export default {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 2. CABEÇALHO SUPERIOR (Header)
 =======================================================================
 */
@@ -2508,8 +2417,7 @@ export default {
   font-size: 13px; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 3. LAYOUT PRINCIPAL EM GRID (3 COLUNAS)
 =======================================================================
 */
@@ -2526,8 +2434,7 @@ export default {
   align-items: start; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 4. MENU LATERAL DE ETAPAS (Esquerda)
 =======================================================================
 */
@@ -2690,8 +2597,7 @@ export default {
   border-radius: 4px; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 5. CONTEÚDO CENTRAL (Área dos Formulários)
 =======================================================================
 */
@@ -2738,8 +2644,7 @@ export default {
   font-size: 14px; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 6. CARDS DE FORMULÁRIO BRANCOS
 =======================================================================
 */
@@ -2784,8 +2689,7 @@ export default {
   margin: 0; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 7. GRIDS FLEXÍVEIS DO FORMULÁRIO E INPUTS
 =======================================================================
 */
@@ -2923,8 +2827,7 @@ export default {
   font-weight: 500; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 8. CONJUNTO DE CUSTOMIZAÇÕES DE DURAÇÃO (INPUT LIGADO A SELECT)
 =======================================================================
 */
@@ -2952,8 +2855,7 @@ export default {
   min-width: 100px; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 9. COMPORTAMENTO TAGS DE PARCEIROS ADDABLES
 =======================================================================
 */
@@ -3054,8 +2956,7 @@ export default {
   transition: all 0.2s; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 10. CARDS E COMPORTAMENTO VISUAL ESTRUTURA DE ETAPAS (ABA 2 VUE)
 =======================================================================
 */
@@ -3371,8 +3272,7 @@ export default {
   border-color: #9ca3af; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 11. MODAIS VUE CSS GERAL E MODAIS ABA 2
 =======================================================================
 */
@@ -3498,8 +3398,7 @@ export default {
   opacity: 0.9; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 12. BOTÕES RODAPÉ FLUXO PRINCIPAL (PROXIMO / VOLTAR)
 =======================================================================
 */
@@ -3554,8 +3453,7 @@ export default {
   transition: opacity 0.2s; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 13. CALENDÁRIO CUSTOMIZADO DINÂMICO
 =======================================================================
 */
@@ -3697,8 +3595,7 @@ export default {
   font-weight: 600; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 14. COLUNA 3 DA DIREITA: BARRA LATERAL LATERAL RESUMOTEXT E INFOS DO SISTEMA 
 =======================================================================
 */
@@ -3858,14 +3755,12 @@ export default {
   color: #9ca3af; 
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 15. ESTILOS EXCLUSIVOS DA ETAPA 3 (FORMULÁRIOS DINÂMICOS, SWITCHES, ETC)
 =======================================================================
 */
 
-/* 
------------------------------
+/* -----------------------------
 COMPONENTE: TOGGLE SWITCH (Interruptor estilo iOS)
 -----------------------------
 */
@@ -3921,8 +3816,7 @@ COMPONENTE: TOGGLE SWITCH (Interruptor estilo iOS)
   transform: translateX(16px); 
 }
 
-/* 
------------------------------
+/* -----------------------------
 COMPONENTE: LISTA DE ITENS (Formulário de Inscrição / Documentos)
 -----------------------------
 */
@@ -4005,8 +3899,7 @@ COMPONENTE: LISTA DE ITENS (Formulário de Inscrição / Documentos)
   border-color: #9ca3af;
 }
 
-/* 
------------------------------
+/* -----------------------------
 COMPONENTE: COTAS E CLASSIFICAÇÃO (Imagem 4)
 -----------------------------
 */
@@ -4066,8 +3959,7 @@ COMPONENTE: COTAS E CLASSIFICAÇÃO (Imagem 4)
   padding: 16px; 
 }
 
-/* 
------------------------------
+/* -----------------------------
 COMPONENTE: PILLS DE SELEÇÃO MÚLTIPLA (Tipos de Documento)
 -----------------------------
 */
@@ -4110,14 +4002,12 @@ COMPONENTE: PILLS DE SELEÇÃO MÚLTIPLA (Tipos de Documento)
   color: #01579b;
 }
 
-/* 
-=======================================================================
+/* =======================================================================
 16. ESTILOS EXCLUSIVOS DA ETAPA 4 (NIVELAMENTO, TABELAS E SLIDERS)
 =======================================================================
 */
 
-/* 
------------------------------
+/* -----------------------------
 COMPONENTE: TABELA DE CURSOS
 -----------------------------
 */
@@ -4169,8 +4059,7 @@ COMPONENTE: TABELA DE CURSOS
   display: inline-block;
 }
 
-/* 
------------------------------
+/* -----------------------------
 COMPONENTE: SLIDER CUSTOMIZADO E CAIXA DE FÓRMULA
 -----------------------------
 */
