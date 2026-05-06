@@ -8,6 +8,7 @@ import PeopleView from '@/views/PeopleView.vue';
 import PersonDetailsView from '@/views/PersonDetailsView.vue';
 import ProgramsView from '@/views/ProgramsView.vue';
 import ProgramDetailsView from '@/views/ProgramDetailsView.vue';
+import ProgramRegistrationView from '@/views/ProgramRegistrationView.vue';
 import ClassDetailsView from '@/views/ClassDetailsView.vue';
 import StageDetailsView from '@/views/StageDetailsView.vue';
 import InstitutionsView from '@/views/InstitutionsView.vue';
@@ -59,6 +60,12 @@ const routes = [
     path: '/programs',
     name: 'Programs',
     component: ProgramsView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/programs/register',
+    name: 'ProgramRegistration',
+    component: ProgramRegistrationView,
     meta: { requiresAuth: true }
   },
   {
